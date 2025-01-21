@@ -9,6 +9,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: {
+          strong: "#2D2D2D",
+          normal: "#686868",
+          weak: "#C1C1C1",
+        },
+        paper: {
+          weak: "#FDFDFD",
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
