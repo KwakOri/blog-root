@@ -12,7 +12,7 @@ import { cva, VariantProps } from "class-variance-authority";
 
 const IconVariants = getVariantsWithCommonClass(
   Object.keys(IconMap) as IconMapTypes[],
-  "stroke-white"
+  "fill-paper-10"
 );
 
 const SVGIconVariants = cva("", {
