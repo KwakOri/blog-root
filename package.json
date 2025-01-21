@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@tiptap-pro/extension-unique-id": "^2.17.2",
     "@tiptap/pm": "^2.11.2",
     "@tiptap/react": "^2.11.2",
