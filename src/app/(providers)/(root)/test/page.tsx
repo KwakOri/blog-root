@@ -1,9 +1,11 @@
+import Sidebar from "@/components/Sidebar";
 import TitleBlock from "@/components/TitleBlock";
 
 const TestPage = () => {
   return (
     <div>
-      <TitleBlock>Hello World</TitleBlock>
+      <TitleBlock>PAGE TITLE</TitleBlock>
+      <Sidebar />
     </div>
   );
 };
