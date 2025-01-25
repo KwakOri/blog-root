@@ -1,12 +1,18 @@
-import Sidebar from "@/components/Sidebar";
-import TitleBlock from "@/components/TitleBlock";
+import BlogItem from "@/components/BlogItem";
+import IndexBar from "@/components/IndexBar";
 
 const TestPage = () => {
   return (
-    <div>
-      <TitleBlock>PAGE TITLE</TitleBlock>
-      <Sidebar />
-    </div>
+    <>
+      <div className={"flex flex-col gap-3 p-4"}>
+        <IndexBar />
+        <BlogItem />
+        <BlogItem />
+        <BlogItem />
+        <BlogItem />
+        <BlogItem />
+      </div>
+    </>
   );
 };
 
