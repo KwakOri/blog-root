@@ -1,6 +1,7 @@
 "use client";
 
 import { publicUrlPrefix } from "@/constants/constant";
+import { uploadImages } from "@/services/post.service";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -10,7 +11,11 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const BlogEditor = () => {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
+    []
+  );
+
+  console.log(imageFiles);
   const changeSrcToPublicUrl = (node: JSONContent) => {
     if (node.type === "image" && node.attrs?.title) {
       const id = node.attrs?.title;
@@ -24,82 +29,91 @@ const BlogEditor = () => {
 
     return node;
   };
-  const onSave = (json: JSONContent) => {
-    console.log(changeSrcToPublicUrl(json));
+  const onSave = async (json: JSONContent) => {
+    console.log("POST CONTENT => ", changeSrcToPublicUrl(json));
+    console.log("IMAGE FILES =>", imageFiles);
+    const res = await uploadImages(imageFiles);
+    console.log(res);
   };
-  const insertImage = (currentEditor: Editor, file: File) => {
-    const fileReader = new FileReader();
+  const addImages = (currentEditor: Editor, files: File[]) => {
+    const addedFiles = files.map((file: File) => ({
+      image: file,
+      id: uuidv4(),
+    }));
 
-    fileReader.readAsDataURL(file);
-    fileReader.onload = () => {
-      currentEditor
-        .chain()
-        .insertContentAt(currentEditor.state.selection.anchor, {
-          type: "image",
-          attrs: {
-            src: fileReader.result,
-            title: uuidv4(),
-          },
-        })
-        .focus()
-        .run();
-    };
+    addedFiles.forEach((addedFile) => {
+      insertImage(currentEditor, addedFile.image, addedFile.id);
+    });
   };
-  const extractImages = (node: JSONContent): string[] => {
-    const images: string[] = [];
+
+  const insertImage = (currentEditor: Editor, file: File, fileName: string) => {
+    const previewUrl = URL.createObjectURL(file);
+    setImageFiles((prev) => [...prev, { image: file, id: fileName }]);
+    currentEditor
+      .chain()
+      .insertContentAt(currentEditor.state.selection.anchor, {
+        type: "image",
+        attrs: {
+          src: previewUrl,
+          title: fileName,
+        },
+      })
+      .focus()
+      .run();
+  };
+  const extractImageIds = (node: JSONContent): string[] => {
+    const imageIds: string[] = [];
 
     if (node.type === "image" && node.attrs?.title) {
-      images.push(node.attrs.title);
+      imageIds.push(node.attrs.title);
     }
 
     if (node.content) {
       node.content.forEach((child: JSONContent) => {
-        images.push(...extractImages(child));
+        imageIds.push(...extractImageIds(child));
       });
     }
 
-    return images;
+    return imageIds;
   };
   const onImageDrop = (currentEditor: Editor, files: File[]) => {
-    files.forEach((file) => {
-      insertImage(currentEditor, file);
-    });
+    addImages(currentEditor, files);
   };
   const onImagePaste = (
     currentEditor: Editor,
     files: File[],
     htmlContent: string | undefined
   ) => {
-    files.forEach((file) => {
-      if (htmlContent) {
-        // if there is htmlContent, stop manual insertion & let other extensions handle insertion via inputRule
-        // you could extract the pasted file from this url string and upload it to a server for example
-        console.log(htmlContent); // eslint-disable-line no-console
-        return false;
-      }
-      insertImage(currentEditor, file);
-    });
+    if (htmlContent) {
+      return false;
+    }
+    addImages(currentEditor, files);
   };
   const onEditorUpdate = ({ editor }: { editor: Editor }) => {
+    console.log("Updated!");
+    console.log(imageFiles);
     const json = editor.getJSON();
+    const foundImageIds = extractImageIds(json);
+    const imageIds = imageFiles.map((imageFile) => imageFile.id);
 
-    const foundImages = extractImages(json);
-
-    const addedImages = foundImages.filter(
-      (image) => !imageUrls.includes(image)
-    );
-    const removedImages = imageUrls.filter(
-      (image) => !foundImages.includes(image)
+    const removedImageIds = imageIds.filter(
+      (imageId) => !foundImageIds.includes(imageId)
     );
 
-    if (addedImages.length > 0 || removedImages.length > 0) {
-      console.log("추가된 이미지:", addedImages);
-      console.log("삭제된 이미지:", removedImages);
-      setImageUrls(foundImages);
+    const addedImageIds = foundImageIds.filter((id) => !imageIds.includes(id));
+
+    console.log("ADDED IMAGE IDS =>", addedImageIds);
+    console.log("REMOVED IMAGE IDS =>", removedImageIds);
+
+    if (removedImageIds.length > 0 || addedImageIds.length > 0) {
+      setImageFiles((prev) =>
+        prev.filter((image) => foundImageIds.includes(image.id))
+      );
     }
   };
 
   const editor = useEditor({
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         autocomplete: "off",
@@ -129,6 +143,11 @@ const BlogEditor = () => {
 
   return (
     <div className="flex flex-col w-full p-4">
+      <input
+        type="text"
+        placeholder={"제목을 입력하세요"}
+        className={"focus:outline-none"}
+      />
       <EditorContent
         editor={editor}
         className={"flex-1 overflow-y-auto text-primary-strong "}
