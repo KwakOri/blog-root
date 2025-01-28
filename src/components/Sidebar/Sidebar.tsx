@@ -18,7 +18,6 @@ const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const pathname = usePathname();
-  console.log(pathname);
   const currentPage = pathname.split("/")[1];
 
   return (

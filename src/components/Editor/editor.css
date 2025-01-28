@@ -1,0 +1,124 @@
+.tiptap > * + * {
+  margin-top: 0.75em;
+}
+
+/* 리스트 스타일 */
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* 헤딩 스타일 - 점진적으로 크기 조절 */
+.tiptap h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h4 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h5 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h6 {
+  font-size: 0.875rem;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+/* 코드 블록 스타일 */
+.tiptap code {
+  background-color: rgba(97, 97, 97, 0.1);
+  color: #616161;
+  font-family: monospace;
+  padding: 0.2em 0.4em;
+  border-radius: 0.3rem;
+}
+
+.tiptap pre {
+  background: #0d0d0d;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-family: "JetBrainsMono", monospace;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  color: inherit;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+/* 강조 표시 */
+.tiptap mark {
+  background-color: #faf594;
+  padding: 0.2em 0.4em;
+  border-radius: 0.2rem;
+}
+
+/* 이미지 스타일 */
+.tiptap img {
+  height: auto;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 구분선 스타일 */
+.tiptap hr {
+  border: none;
+  border-top: 2px solid rgba(13, 13, 13, 0.1);
+  margin: 2rem 0;
+}
+
+/* 블록 인용 스타일 */
+.tiptap blockquote {
+  border-left: 4px solid rgba(13, 13, 13, 0.1);
+  padding-left: 1rem;
+  font-style: italic;
+  color: #555;
+  margin: 1rem 0;
+}
+
+/* 할 일 목록 스타일 */
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.tiptap ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
