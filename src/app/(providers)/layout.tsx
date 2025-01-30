@@ -1,7 +1,8 @@
+import QueryProvider from "@/app/(providers)/_components/QueryProvider";
 import { PropsWithChildren } from "react";
 
 const layout = ({ children }: PropsWithChildren) => {
-  return <div>{children}</div>;
+  return <QueryProvider>{children}</QueryProvider>;
 };
 
 export default layout;

@@ -11,58 +11,73 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./editor.css";
 
-interface CategoryData {
-  blog: string;
-  categories: string[];
+interface TCategory {
+  id: number;
+  blogId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+interface TCategories {
+  blogId: number;
+  blogName: string;
+  categories: TCategory[];
 }
 
-const dummyCategoriesData: CategoryData[] = [
+const dummyCategoriesData: TCategories[] = [
+  { blogId: 1, blogName: "entertain", categories: [] },
   {
-    blog: "IT",
-    categories: ["Phone", "Desktop", "Mobile", "Tablet", "Gadget"],
-  },
-  {
-    blog: "Technology",
+    blogId: 2,
+    blogName: "it",
     categories: [
-      "Artificial Intelligence",
-      "Robotics",
-      "Quantum Computing",
-      "IoT",
-      "Blockchain",
+      {
+        id: 1,
+        blogId: 2,
+        name: "apple",
+        createdAt: "2025-01-03T17:59:17.643Z",
+        updatedAt: "2025-01-03T17:59:17.643Z",
+      },
+      {
+        id: 2,
+        blogId: 2,
+        name: "samsung",
+        createdAt: "2025-01-03T17:59:17.643Z",
+        updatedAt: "2025-01-03T17:59:17.643Z",
+      },
     ],
   },
   {
-    blog: "Lifestyle",
+    blogId: 4,
+    blogName: "development",
     categories: [
-      "Fitness",
-      "Healthy Eating",
-      "Mental Health",
-      "Travel",
-      "Personal Growth",
-    ],
-  },
-  {
-    blog: "Finance",
-    categories: [
-      "Investing",
-      "Personal Finance",
-      "Cryptocurrency",
-      "Stock Market",
-      "Real Estate",
-    ],
-  },
-  {
-    blog: "Entertainment",
-    categories: ["Movies", "TV Shows", "Music", "Gaming", "Books"],
-  },
-  {
-    blog: "Science",
-    categories: [
-      "Physics",
-      "Biology",
-      "Chemistry",
-      "Astronomy",
-      "Environmental Science",
+      {
+        id: 3,
+        blogId: 4,
+        name: "react",
+        createdAt: "2025-01-29T03:02:52.999Z",
+        updatedAt: "2025-01-29T03:02:52.999Z",
+      },
+      {
+        id: 4,
+        blogId: 4,
+        name: "next",
+        createdAt: "2025-01-29T03:03:13.280Z",
+        updatedAt: "2025-01-29T03:03:13.280Z",
+      },
+      {
+        id: 5,
+        blogId: 4,
+        name: "node",
+        createdAt: "2025-01-29T03:03:22.918Z",
+        updatedAt: "2025-01-29T03:03:22.918Z",
+      },
+      {
+        id: 6,
+        blogId: 4,
+        name: "express",
+        createdAt: "2025-01-29T03:03:32.573Z",
+        updatedAt: "2025-01-29T03:03:32.573Z",
+      },
     ],
   },
 ];
@@ -71,14 +86,12 @@ const BlogEditor = () => {
   const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
     []
   );
-  const [selectedBlog, setSelectedBlog] = useState<string>(
-    dummyCategoriesData[0].blog
-  );
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    dummyCategoriesData[0].categories[0]
-  );
+  const [selectedBlog, setSelectedBlog] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
+  console.log(selectedCategory);
   console.log(imageFiles);
+
   const changeSrcToPublicUrl = (node: JSONContent) => {
     if (node.type === "image" && node.attrs?.title) {
       const id = node.attrs?.title;
@@ -225,12 +238,12 @@ const BlogEditor = () => {
                   "text-primary-white focus:outline-none font-bold bg-primary-strong"
                 }
                 onChange={(e) => {
-                  setSelectedBlog(e.target.value);
+                  setSelectedBlog(Number(e.target.value));
                 }}
               >
-                {dummyCategoriesData.map(({ blog }) => (
-                  <option value={blog} key={blog}>
-                    {blog}
+                {dummyCategoriesData.map((blog) => (
+                  <option value={blog.blogId} key={blog.blogId}>
+                    {blog.blogName}
                   </option>
                 ))}
               </select>
@@ -242,14 +255,14 @@ const BlogEditor = () => {
                   "text-primary-white focus:outline-none font-bold bg-primary-strong"
                 }
                 onChange={(e) => {
-                  setSelectedCategory(e.target.value);
+                  setSelectedCategory(Number(e.target.value));
                 }}
               >
                 {dummyCategoriesData
-                  .find(({ blog }) => selectedBlog === blog)
+                  .find(({ blogId }) => selectedBlog === blogId)
                   ?.categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                    <option key={category.id} value={category.id}>
+                      {category.name}
                     </option>
                   ))}
               </select>
