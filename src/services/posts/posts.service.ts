@@ -5,6 +5,13 @@ interface UploadedImage {
   id: string;
 }
 
+interface UploadPost {
+  blogId: number | null;
+  categoryId: number | null;
+  title: string;
+  content: string;
+}
+
 export const uploadImages = async (files: UploadedImage[]) => {
   // API 호출 함수들을 배열로 만들어
   const responses = files.map((file) => {
@@ -27,4 +34,18 @@ export const uploadImages = async (files: UploadedImage[]) => {
     console.error("Error uploading images:", error);
     throw error; // 오류가 발생하면 처리
   }
+};
+
+export const uploadPost = async ({
+  blogId,
+  categoryId,
+  title,
+  content,
+}: UploadPost) => {
+  const body = { categoryId, title, content };
+  return client.post(`/r2/upload?blogId=${blogId}`, body, {
+    headers: {
+      "Content-Type": "json",
+    },
+  });
 };

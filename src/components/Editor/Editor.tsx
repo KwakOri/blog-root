@@ -1,7 +1,8 @@
 "use client";
 
 import { publicUrlPrefix } from "@/constants/constant";
-import { uploadImages } from "@/services/post.service";
+import { useGetAllCategories } from "@/services/categories/categories.hooks";
+import { uploadPost } from "@/services/posts/posts.service";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -11,76 +12,18 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./editor.css";
 
-interface TCategory {
+export interface TCategory {
   id: number;
   blogId: number;
   name: string;
   createdAt: string;
   updatedAt: string;
 }
-interface TCategories {
+export interface TCategories {
   blogId: number;
   blogName: string;
   categories: TCategory[];
 }
-
-const dummyCategoriesData: TCategories[] = [
-  { blogId: 1, blogName: "entertain", categories: [] },
-  {
-    blogId: 2,
-    blogName: "it",
-    categories: [
-      {
-        id: 1,
-        blogId: 2,
-        name: "apple",
-        createdAt: "2025-01-03T17:59:17.643Z",
-        updatedAt: "2025-01-03T17:59:17.643Z",
-      },
-      {
-        id: 2,
-        blogId: 2,
-        name: "samsung",
-        createdAt: "2025-01-03T17:59:17.643Z",
-        updatedAt: "2025-01-03T17:59:17.643Z",
-      },
-    ],
-  },
-  {
-    blogId: 4,
-    blogName: "development",
-    categories: [
-      {
-        id: 3,
-        blogId: 4,
-        name: "react",
-        createdAt: "2025-01-29T03:02:52.999Z",
-        updatedAt: "2025-01-29T03:02:52.999Z",
-      },
-      {
-        id: 4,
-        blogId: 4,
-        name: "next",
-        createdAt: "2025-01-29T03:03:13.280Z",
-        updatedAt: "2025-01-29T03:03:13.280Z",
-      },
-      {
-        id: 5,
-        blogId: 4,
-        name: "node",
-        createdAt: "2025-01-29T03:03:22.918Z",
-        updatedAt: "2025-01-29T03:03:22.918Z",
-      },
-      {
-        id: 6,
-        blogId: 4,
-        name: "express",
-        createdAt: "2025-01-29T03:03:32.573Z",
-        updatedAt: "2025-01-29T03:03:32.573Z",
-      },
-    ],
-  },
-];
 
 const BlogEditor = () => {
   const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
@@ -89,8 +32,11 @@ const BlogEditor = () => {
   const [selectedBlog, setSelectedBlog] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
+  const { data: categoriesData, isPending: isCategoriesPending } =
+    useGetAllCategories();
+
+  console.log(selectedBlog);
   console.log(selectedCategory);
-  console.log(imageFiles);
 
   const changeSrcToPublicUrl = (node: JSONContent) => {
     if (node.type === "image" && node.attrs?.title) {
@@ -108,7 +54,15 @@ const BlogEditor = () => {
   const onSave = async (json: JSONContent) => {
     console.log("POST CONTENT => ", changeSrcToPublicUrl(json));
     console.log("IMAGE FILES =>", imageFiles);
-    const res = await uploadImages(imageFiles);
+    const body = {
+      title: "hello guys",
+      content: "good",
+      blogId: selectedBlog,
+      categoryId: selectedCategory,
+    };
+    const res = await uploadPost(body);
+
+    // const res = await uploadImages(imageFiles);
     console.log(res);
   };
   const addImages = (currentEditor: Editor, files: File[]) => {
@@ -231,43 +185,47 @@ const BlogEditor = () => {
             />
             <div className={"w-[50px] h-2 shrink-0 bg-primary-strong"}></div>
           </div>
-          <div className={"flex gap-4"}>
-            <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
-              <select
-                className={
-                  "text-primary-white focus:outline-none font-bold bg-primary-strong"
-                }
-                onChange={(e) => {
-                  setSelectedBlog(Number(e.target.value));
-                }}
-              >
-                {dummyCategoriesData.map((blog) => (
-                  <option value={blog.blogId} key={blog.blogId}>
-                    {blog.blogName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
-              <select
-                className={
-                  "text-primary-white focus:outline-none font-bold bg-primary-strong"
-                }
-                onChange={(e) => {
-                  setSelectedCategory(Number(e.target.value));
-                }}
-              >
-                {dummyCategoriesData
-                  .find(({ blogId }) => selectedBlog === blogId)
-                  ?.categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
+          {isCategoriesPending ? (
+            <p>Loading...</p>
+          ) : (
+            <div className={"flex gap-4"}>
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedBlog(Number(e.target.value));
+                  }}
+                >
+                  {categoriesData?.map((blog) => (
+                    <option value={blog.blogId} key={blog.blogId}>
+                      {blog.blogName}
                     </option>
                   ))}
-              </select>
+                </select>
+              </div>
+
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedCategory(Number(e.target.value));
+                  }}
+                >
+                  {categoriesData
+                    ?.find(({ blogId }) => selectedBlog === blogId)
+                    ?.categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <hr className={"py-2"} />
 
