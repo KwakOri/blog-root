@@ -6,8 +6,8 @@ interface UploadedImage {
 }
 
 interface UploadPost {
-  blogId: number | null;
-  categoryId: number | null;
+  blogId: number;
+  categoryId: number;
   title: string;
   content: string;
 }
@@ -43,9 +43,27 @@ export const uploadPost = async ({
   content,
 }: UploadPost) => {
   const body = { categoryId, title, content };
-  return client.post(`/r2/upload?blogId=${blogId}`, body, {
+
+  const res = await client.post(`/posts?blogId=${blogId}`, body, {
     headers: {
-      "Content-Type": "json",
+      "Content-Type": "application/json",
     },
   });
+
+  return res;
+};
+
+export const getAllPosts = async () => {
+  const res = await client.get("/posts");
+  return res.data;
+};
+
+export const getPosts = async (blogId: number) => {
+  const res = await client.get(`/posts?blogId=${blogId}`);
+  return res.data;
+};
+
+export const getPost = async (blogId: number, postId: number) => {
+  const res = await client.get(`/posts/${postId}?blogId=${blogId}`);
+  return res.data;
 };

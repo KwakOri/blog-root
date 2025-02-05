@@ -29,14 +29,19 @@ const BlogEditor = () => {
   const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
     []
   );
-  const [selectedBlog, setSelectedBlog] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [postTitle, setPostTitle] = useState<string>("");
+  const [selectedBlog, setSelectedBlog] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<number>(0);
 
   const { data: categoriesData, isPending: isCategoriesPending } =
     useGetAllCategories();
 
   console.log(selectedBlog);
   console.log(selectedCategory);
+
+  const onPostTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPostTitle(e.target.value);
+  };
 
   const changeSrcToPublicUrl = (node: JSONContent) => {
     if (node.type === "image" && node.attrs?.title) {
@@ -52,18 +57,18 @@ const BlogEditor = () => {
     return node;
   };
   const onSave = async (json: JSONContent) => {
-    console.log("POST CONTENT => ", changeSrcToPublicUrl(json));
+    console.log("POST CONTENT => ");
     console.log("IMAGE FILES =>", imageFiles);
     const body = {
-      title: "hello guys",
-      content: "good",
+      title: postTitle,
+      content: JSON.stringify(changeSrcToPublicUrl(json)),
       blogId: selectedBlog,
       categoryId: selectedCategory,
     };
+    console.log(body);
     const res = await uploadPost(body);
-
+    // console.log(res);
     // const res = await uploadImages(imageFiles);
-    console.log(res);
   };
   const addImages = (currentEditor: Editor, files: File[]) => {
     const addedFiles = files.map((file: File) => ({
@@ -179,6 +184,8 @@ const BlogEditor = () => {
             <input
               type="text"
               placeholder={"제목을 입력하세요"}
+              value={postTitle}
+              onChange={onPostTitleChange}
               className={
                 "focus:outline-none font-bold text-[36px] placeholder:text-primary-weak text-primary-strong"
               }
@@ -222,6 +229,7 @@ const BlogEditor = () => {
                         {category.name}
                       </option>
                     ))}
+                  <option value={0}>전체</option>
                 </select>
               </div>
             </div>
