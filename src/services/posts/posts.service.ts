@@ -53,13 +53,10 @@ export const uploadPost = async ({
   return res;
 };
 
-export const getAllPosts = async () => {
-  const res = await client.get("/posts");
-  return res.data;
-};
-
 export const getPosts = async (blogId: number) => {
-  const res = await client.get(`/posts?blogId=${blogId}`);
+  const res = await client.get(
+    `/posts${blogId === 0 ? "" : `?blogId=${blogId}`}`
+  );
   return res.data;
 };
 
