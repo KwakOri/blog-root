@@ -1,7 +1,8 @@
 "use client";
 
 import { publicUrlPrefix } from "@/constants/constant";
-import { uploadImages } from "@/services/post.service";
+import { useGetAllCategories } from "@/services/categories/categories.hooks";
+import { uploadImages, uploadPost } from "@/services/posts/posts.service";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -11,74 +12,34 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./editor.css";
 
-interface CategoryData {
-  blog: string;
-  categories: string[];
+export interface TCategory {
+  id: number;
+  blogId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
-
-const dummyCategoriesData: CategoryData[] = [
-  {
-    blog: "IT",
-    categories: ["Phone", "Desktop", "Mobile", "Tablet", "Gadget"],
-  },
-  {
-    blog: "Technology",
-    categories: [
-      "Artificial Intelligence",
-      "Robotics",
-      "Quantum Computing",
-      "IoT",
-      "Blockchain",
-    ],
-  },
-  {
-    blog: "Lifestyle",
-    categories: [
-      "Fitness",
-      "Healthy Eating",
-      "Mental Health",
-      "Travel",
-      "Personal Growth",
-    ],
-  },
-  {
-    blog: "Finance",
-    categories: [
-      "Investing",
-      "Personal Finance",
-      "Cryptocurrency",
-      "Stock Market",
-      "Real Estate",
-    ],
-  },
-  {
-    blog: "Entertainment",
-    categories: ["Movies", "TV Shows", "Music", "Gaming", "Books"],
-  },
-  {
-    blog: "Science",
-    categories: [
-      "Physics",
-      "Biology",
-      "Chemistry",
-      "Astronomy",
-      "Environmental Science",
-    ],
-  },
-];
+export interface TCategories {
+  blogId: number;
+  blogName: string;
+  categories: TCategory[];
+}
 
 const BlogEditor = () => {
   const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
     []
   );
-  const [selectedBlog, setSelectedBlog] = useState<string>(
-    dummyCategoriesData[0].blog
-  );
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    dummyCategoriesData[0].categories[0]
-  );
+  const [postTitle, setPostTitle] = useState<string>("");
+  const [selectedBlog, setSelectedBlog] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<number>(0);
 
-  console.log(imageFiles);
+  const { data: categoriesData, isPending: isCategoriesPending } =
+    useGetAllCategories();
+
+  const onPostTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPostTitle(e.target.value);
+  };
+
   const changeSrcToPublicUrl = (node: JSONContent) => {
     if (node.type === "image" && node.attrs?.title) {
       const id = node.attrs?.title;
@@ -93,10 +54,19 @@ const BlogEditor = () => {
     return node;
   };
   const onSave = async (json: JSONContent) => {
-    console.log("POST CONTENT => ", changeSrcToPublicUrl(json));
-    console.log("IMAGE FILES =>", imageFiles);
-    const res = await uploadImages(imageFiles);
-    console.log(res);
+    const imageResponse = await uploadImages(imageFiles);
+    console.log("Image Upload Result =>", imageResponse);
+
+    const body = {
+      title: postTitle,
+      content: JSON.stringify(changeSrcToPublicUrl(json)),
+      blogId: selectedBlog,
+      categoryId: selectedCategory,
+      isPublished: true,
+      imageIds: imageFiles.map((image) => image.id).join(""),
+    };
+    const postResponse = await uploadPost(body);
+    console.log("Post Upload Result =>", postResponse);
   };
   const addImages = (currentEditor: Editor, files: File[]) => {
     const addedFiles = files.map((file: File) => ({
@@ -206,55 +176,62 @@ const BlogEditor = () => {
 
   return (
     <>
-      <div className="flex flex-col w-full p-4">
+      <div className="flex flex-col w-full h-full">
         <div className="flex flex-col gap-5 w-full justify-center py-5">
           <div className={"flex flex-col gap-2"}>
             <input
               type="text"
               placeholder={"제목을 입력하세요"}
+              value={postTitle}
+              onChange={onPostTitleChange}
               className={
                 "focus:outline-none font-bold text-[36px] placeholder:text-primary-weak text-primary-strong"
               }
             />
             <div className={"w-[50px] h-2 shrink-0 bg-primary-strong"}></div>
           </div>
-          <div className={"flex gap-4"}>
-            <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
-              <select
-                className={
-                  "text-primary-white focus:outline-none font-bold bg-primary-strong"
-                }
-                onChange={(e) => {
-                  setSelectedBlog(e.target.value);
-                }}
-              >
-                {dummyCategoriesData.map(({ blog }) => (
-                  <option value={blog} key={blog}>
-                    {blog}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
-              <select
-                className={
-                  "text-primary-white focus:outline-none font-bold bg-primary-strong"
-                }
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
-                }}
-              >
-                {dummyCategoriesData
-                  .find(({ blog }) => selectedBlog === blog)
-                  ?.categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+          {isCategoriesPending ? (
+            <p>Loading...</p>
+          ) : (
+            <div className={"flex gap-4"}>
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedBlog(Number(e.target.value));
+                  }}
+                >
+                  {categoriesData?.map((blog) => (
+                    <option value={blog.blogId} key={blog.blogId}>
+                      {blog.blogName}
                     </option>
                   ))}
-              </select>
+                </select>
+              </div>
+
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedCategory(Number(e.target.value));
+                  }}
+                >
+                  {categoriesData
+                    ?.find(({ blogId }) => selectedBlog === blogId)
+                    ?.categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  <option value={0}>전체</option>
+                </select>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <hr className={"py-2"} />
 

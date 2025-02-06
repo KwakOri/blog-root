@@ -1,19 +1,21 @@
-import ItemText from "@/components/ItemText/ItemText";
+import IndexText from "@/components/IndexBar/IndexText/IndexText";
 import OptionButton from "@/components/OptionButton";
 
-const IndexBar = () => {
+interface IndexBarProps {
+  index1: string;
+  index2: string;
+  index3: string;
+  index4: string;
+}
+
+const IndexBar = ({ index1, index2, index3, index4 }: IndexBarProps) => {
   return (
     <div className="flex items-center gap-3 p-4">
-      <div
-        className={
-          "w-[60px] h-[10px] rounded-xl bg-primary-normal opacity-0 shrink-0"
-        }
-      ></div>
       <div className={"w-full flex gap-3 "}>
-        <ItemText>Text</ItemText>
-        <ItemText>Text</ItemText>
-        <ItemText>Text</ItemText>
-        <ItemText>Text</ItemText>
+        <IndexText>{index1}</IndexText>
+        <IndexText>{index2}</IndexText>
+        <IndexText>{index3}</IndexText>
+        <IndexText>{index4}</IndexText>
       </div>
       <OptionButton className={"opacity-0"} />
     </div>

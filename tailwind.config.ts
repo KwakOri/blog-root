@@ -18,6 +18,8 @@ export default {
         },
         paper: {
           weak: "#FDFDFD",
+          normal: "#FCFCFC",
+          strong: "#F5F5F5",
         },
         background: "var(--background)",
         foreground: "var(--foreground)",

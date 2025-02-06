@@ -1,5 +1,5 @@
-import BlogItem from "@/components/BlogItem";
 import IndexBar from "@/components/IndexBar";
+import BlogItem from "@/components/ListItem";
 
 const TestPage = () => {
   return (
