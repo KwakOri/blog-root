@@ -7,6 +7,7 @@ export interface TPost {
   id: number;
   title: string;
   updatedAt: string;
+  isPublished: boolean;
   categories: {
     name: string;
   };

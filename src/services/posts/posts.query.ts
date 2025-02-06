@@ -13,8 +13,8 @@ export const options = {
       queryFn: () => getPosts(blogId),
     };
   },
-  post: (blogId: number, postId: number) => ({
+  post: (postId: number) => ({
     queryKey: postQueryKeys.post(postId),
-    queryFn: () => getPost(blogId, postId),
+    queryFn: () => getPost(postId),
   }),
 };

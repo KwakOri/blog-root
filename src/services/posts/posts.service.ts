@@ -10,6 +10,8 @@ interface UploadPost {
   categoryId: number;
   title: string;
   content: string;
+  isPublished?: boolean;
+  imageIds?: string;
 }
 
 export const uploadImages = async (files: UploadedImage[]) => {
@@ -41,8 +43,10 @@ export const uploadPost = async ({
   categoryId,
   title,
   content,
+  isPublished = false,
+  imageIds = "",
 }: UploadPost) => {
-  const body = { categoryId, title, content };
+  const body = { categoryId, title, content, isPublished, imageIds };
 
   const res = await client.post(`/posts?blogId=${blogId}`, body, {
     headers: {
@@ -60,7 +64,7 @@ export const getPosts = async (blogId: number) => {
   return res.data;
 };
 
-export const getPost = async (blogId: number, postId: number) => {
-  const res = await client.get(`/posts/${postId}?blogId=${blogId}`);
+export const getPost = async (postId: number) => {
+  const res = await client.get(`/posts/${postId}`);
   return res.data;
 };

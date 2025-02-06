@@ -2,7 +2,7 @@
 
 import { publicUrlPrefix } from "@/constants/constant";
 import { useGetAllCategories } from "@/services/categories/categories.hooks";
-import { uploadPost } from "@/services/posts/posts.service";
+import { uploadImages, uploadPost } from "@/services/posts/posts.service";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -36,9 +36,6 @@ const BlogEditor = () => {
   const { data: categoriesData, isPending: isCategoriesPending } =
     useGetAllCategories();
 
-  console.log(selectedBlog);
-  console.log(selectedCategory);
-
   const onPostTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPostTitle(e.target.value);
   };
@@ -57,18 +54,19 @@ const BlogEditor = () => {
     return node;
   };
   const onSave = async (json: JSONContent) => {
-    console.log("POST CONTENT => ");
-    console.log("IMAGE FILES =>", imageFiles);
+    const imageResponse = await uploadImages(imageFiles);
+    console.log("Image Upload Result =>", imageResponse);
+
     const body = {
       title: postTitle,
       content: JSON.stringify(changeSrcToPublicUrl(json)),
       blogId: selectedBlog,
       categoryId: selectedCategory,
+      isPublished: true,
+      imageIds: imageFiles.map((image) => image.id).join(""),
     };
-    console.log(body);
-    const res = await uploadPost(body);
-    // console.log(res);
-    // const res = await uploadImages(imageFiles);
+    const postResponse = await uploadPost(body);
+    console.log("Post Upload Result =>", postResponse);
   };
   const addImages = (currentEditor: Editor, files: File[]) => {
     const addedFiles = files.map((file: File) => ({

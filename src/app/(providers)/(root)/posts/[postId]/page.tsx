@@ -11,8 +11,11 @@ const PostDetailPage = async ({
   const { data: post } = await client.get(`/posts/${postId}`);
 
   return (
-    <div className={"w-full h-full p-4"}>
-      <PrevButton />
+    <div className={"w-full h-full p-4 flex flex-col"}>
+      <div className={"pb-2"}>
+        <PrevButton />
+      </div>
+
       <PostReader post={post} />
     </div>
   );

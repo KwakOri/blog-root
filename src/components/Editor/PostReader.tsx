@@ -18,7 +18,7 @@ const PostReader = ({ post }: PostReaderProps) => {
 
   return (
     <>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full h-full overflow-y-scroll">
         <div className="flex flex-col gap-5 w-full justify-center py-5">
           <div className={"flex flex-col gap-2"}>
             <p
@@ -34,7 +34,7 @@ const PostReader = ({ post }: PostReaderProps) => {
         <hr className={"py-2"} />
 
         <div
-          className={"flex-1 overflow-y-auto text-primary-strong "}
+          className={"flex-1 text-primary-strong "}
           dangerouslySetInnerHTML={{ __html: html }}
         ></div>
       </div>
