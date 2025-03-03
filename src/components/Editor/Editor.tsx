@@ -3,11 +3,14 @@
 import { publicUrlPrefix } from "@/constants/constant";
 import { useGetAllCategories } from "@/services/categories/categories.hooks";
 import { uploadImages, uploadPost } from "@/services/posts/posts.service";
+import { TPost } from "@/types/posts";
+import { useMutation } from "@tanstack/react-query";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./editor.css";
@@ -25,16 +28,69 @@ export interface TCategories {
   categories: TCategory[];
 }
 
-const BlogEditor = () => {
+interface TBlogEditor {
+  post?: TPost;
+}
+
+const BlogEditor = ({ post }: TBlogEditor) => {
+  const initialData: {
+    imageIds: number[];
+    content: JSONContent;
+    title: string;
+    blogId: number;
+    categoryId: number;
+  } = !post
+    ? {
+        imageIds: [],
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+            },
+          ],
+        },
+        title: "",
+        blogId: 0,
+        categoryId: 0,
+      }
+    : {
+        imageIds: post?.imageIds.split(",").map((id) => parseInt(id)),
+        content: JSON.parse(post?.content),
+        title: post?.title,
+        blogId: post?.blogId,
+        categoryId: post?.categoryId,
+      };
+
+  const [initialImageIds, setInitialImageIds] = useState<number[]>(
+    initialData.imageIds
+  );
   const [imageFiles, setImageFiles] = useState<{ image: File; id: string }[]>(
     []
   );
-  const [postTitle, setPostTitle] = useState<string>("");
-  const [selectedBlog, setSelectedBlog] = useState<number>(0);
-  const [selectedCategory, setSelectedCategory] = useState<number>(0);
+  const [postTitle, setPostTitle] = useState<string>(initialData.title);
+  const [selectedBlog, setSelectedBlog] = useState<number>(initialData.blogId);
+  const [selectedCategory, setSelectedCategory] = useState<number>(
+    initialData.categoryId
+  );
+  const router = useRouter();
 
   const { data: categoriesData, isPending: isCategoriesPending } =
     useGetAllCategories();
+
+  const { mutate: uploadPostMutation, isPending: isUploadingPost } =
+    useMutation({
+      mutationFn: (json: JSONContent) => onSave(json),
+      onSuccess: (data) => {
+        const id = data.data.id;
+        console.log("Upload Result =>", data);
+        alert("저장이 완료되었습니다.");
+        router.replace(`/posts/${id}`);
+      },
+      onError: () => {
+        alert("저장에 실패했습니다.");
+      },
+    });
 
   const onPostTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPostTitle(e.target.value);
@@ -53,6 +109,7 @@ const BlogEditor = () => {
 
     return node;
   };
+
   const onSave = async (json: JSONContent) => {
     const imageResponse = await uploadImages(imageFiles);
     console.log("Image Upload Result =>", imageResponse);
@@ -65,9 +122,17 @@ const BlogEditor = () => {
       isPublished: true,
       imageIds: imageFiles.map((image) => image.id).join(""),
     };
-    const postResponse = await uploadPost(body);
-    console.log("Post Upload Result =>", postResponse);
+    return await uploadPost(body);
   };
+
+  const handleSavePost = (json: JSONContent) => {
+    if (selectedBlog === 0) return alert("블로그를 선택해주세요.");
+    if (selectedCategory === 0) return alert("카테고리를 선택해주세요.");
+    if (postTitle === "") return alert("제목을 입력해주세요.");
+    if (json?.content?.length === 0) return alert("내용을 입력해주세요.");
+    uploadPostMutation(json);
+  };
+
   const addImages = (currentEditor: Editor, files: File[]) => {
     const addedFiles = files.map((file: File) => ({
       image: file,
@@ -106,7 +171,6 @@ const BlogEditor = () => {
         imageIds.push(...extractImageIds(child));
       });
     }
-
     return imageIds;
   };
   const onImageDrop = (currentEditor: Editor, files: File[]) => {
@@ -170,7 +234,7 @@ const BlogEditor = () => {
         onPaste: onImagePaste,
       }),
     ],
-    content: "<p>Hello World! 🌎️</p>",
+    content: initialData.content,
     onUpdate: onEditorUpdate,
   });
 
@@ -191,7 +255,33 @@ const BlogEditor = () => {
             <div className={"w-[50px] h-2 shrink-0 bg-primary-strong"}></div>
           </div>
           {isCategoriesPending ? (
-            <p>Loading...</p>
+            <div className={"flex gap-4"}>
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedBlog(Number(e.target.value));
+                  }}
+                >
+                  <option value={0}>불러오는 중</option>
+                </select>
+              </div>
+
+              <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
+                <select
+                  className={
+                    "text-primary-white focus:outline-none font-bold bg-primary-strong"
+                  }
+                  onChange={(e) => {
+                    setSelectedCategory(Number(e.target.value));
+                  }}
+                >
+                  <option value={0}>불러오는 중</option>
+                </select>
+              </div>
+            </div>
           ) : (
             <div className={"flex gap-4"}>
               <div className={"px-4 py-1.5 rounded bg-primary-strong"}>
@@ -227,7 +317,7 @@ const BlogEditor = () => {
                         {category.name}
                       </option>
                     ))}
-                  <option value={0}>전체</option>
+                  <option value={0}>선택 없음</option>
                 </select>
               </div>
             </div>
@@ -243,14 +333,14 @@ const BlogEditor = () => {
           <button
             onClick={() => {
               if (editor) {
-                onSave(editor.getJSON());
+                handleSavePost(editor.getJSON());
               }
             }}
-            className={
-              "px-4 py-1.5 rounded bg-primary-strong text-white brightness-100 hover:bg-primary-normal"
-            }
+            className={`px-4 py-1.5 rounded bg-primary-strong text-white brightness-100 hover:bg-primary-normal ${
+              isUploadingPost ? "disabled" : ""
+            }`}
           >
-            저장
+            {isUploadingPost ? "저장중..." : "저장"}
           </button>
           <button
             className={

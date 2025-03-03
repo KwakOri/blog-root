@@ -19,9 +19,8 @@ const ListItem = ({ index1, index2, index3, index4 }: ListItemProps) => {
           <ItemText>{index4}</ItemText>
         </div>
       </div>
-      <div className="flex items-center gap-3 p-4 rounded-2xl bg-paper-normal brightness-100 transition-all hover:brightness-90 hover:shadow-small-inset cursor-pointer">
-        <OptionButton />
-      </div>
+
+      <OptionButton />
     </div>
   );
 };

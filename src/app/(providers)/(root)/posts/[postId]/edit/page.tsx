@@ -8,6 +8,8 @@ const PostEditPage = () => {
   const pathname = usePathname();
   const postId = pathname.split("/")[2];
   const { data: post, isPending: isPostPending } = useGetPost(Number(postId));
+  console.log("program is working");
+  console.log("post content => ", post);
 
   return (
     <div className={"w-full h-full p-4 flex flex-col"}>

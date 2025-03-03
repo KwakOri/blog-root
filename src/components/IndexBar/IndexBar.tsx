@@ -10,14 +10,14 @@ interface IndexBarProps {
 
 const IndexBar = ({ index1, index2, index3, index4 }: IndexBarProps) => {
   return (
-    <div className="flex items-center gap-3 p-4">
-      <div className={"w-full flex gap-3 "}>
+    <div className="flex items-center gap-2 ">
+      <div className={"w-full flex p-4 gap-3"}>
         <IndexText>{index1}</IndexText>
         <IndexText>{index2}</IndexText>
         <IndexText>{index3}</IndexText>
         <IndexText>{index4}</IndexText>
       </div>
-      <OptionButton className={"opacity-0"} />
+      <OptionButton className={"opacity-0 pointer-events-none"} />
     </div>
   );
 };

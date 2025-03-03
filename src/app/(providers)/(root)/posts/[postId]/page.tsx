@@ -1,3 +1,4 @@
+import EditButton from "@/components/Buttons/EditButton";
 import PrevButton from "@/components/Buttons/PrevButton";
 import PostReader from "@/components/Editor/PostReader";
 import { client } from "@/services/index.service";
@@ -12,8 +13,9 @@ const PostDetailPage = async ({
 
   return (
     <div className={"w-full h-full p-4 flex flex-col"}>
-      <div className={"pb-2"}>
+      <div className={"pb-2 flex gap-2"}>
         <PrevButton />
+        <EditButton postId={postId} />
       </div>
 
       <PostReader post={post} />
